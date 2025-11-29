@@ -1,4 +1,4 @@
-target: diffbir.model.Diffusion
+target: cldm.model.Diffusion
 params:
   beta_schedule: linear
   linear_start: 0.00085

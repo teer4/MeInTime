@@ -1,4 +1,4 @@
-target: diffbir.model.SwinIR
+target: cldm.model.SwinIR
 params:
   img_size: 64
   patch_size: 1

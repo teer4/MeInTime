@@ -13,11 +13,11 @@ from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
 from torch_ema import ExponentialMovingAverage
 
-from diffbir.model import ControlLDM, SwinIR, Diffusion
-from diffbir.utils.common import instantiate_from_config
-from diffbir.sampler import SpacedSampler
+from cldm.model import ControlLDM, SwinIR, Diffusion
+from cldm.utils.common import instantiate_from_config
+from cldm.sampler import SpacedSampler
 
-from diffbir.dataset.face_adapter_dataset import FaceAdapterDataset
+from cldm.dataset.face_adapter_dataset import FaceAdapterDataset
 from pyiqa import create_metric  
 from eval import evaluate_on_val
 

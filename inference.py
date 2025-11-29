@@ -3,13 +3,7 @@ from omegaconf import OmegaConf
 import torch
 
 from accelerate.utils import set_seed
-from diffbir.inference import (
-    BSRInferenceLoop,
-    BFRInferenceLoop,
-    BIDInferenceLoop,
-    UnAlignedBFRInferenceLoop,
-    CustomInferenceLoop,
-)
+from inference_loop import InferenceLoop
 
 
 def check_device(device: str) -> str:
@@ -54,36 +48,10 @@ DEFAULT_SRC_PROMPT = ("photo of a person")
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    # model parameters
-    parser.add_argument(
-        "--task",
-        type=str,
-        default="sr",
-        choices=["sr", "face", "denoise", "unaligned_face"],
-        help="Task you want to do. Ignore this option if you are using self-trained model.",
-    )
     parser.add_argument(
         "--upscale", type=float, default=4, help="Upscale factor of output."
     )
-    parser.add_argument(
-        "--version",
-        type=str,
-        default="v2.1",
-        choices=["v1", "v2", "v2.1", "custom"],
-        help="DiffBIR model version.",
-    )
-    parser.add_argument(
-        "--train_cfg",
-        type=str,
-        default="",
-        help="Path to training config. Only works when version is custom.",
-    )
-    parser.add_argument(
-        "--ckpt",
-        type=str,
-        default="",
-        help="Path to saved checkpoint. Only works when version is custom.",
-    )
+
     # sampling parameters
     parser.add_argument(
         "--sampler",
@@ -104,7 +72,7 @@ def parse_args() -> Namespace:
             "edm_dpm++_2m",
             "edm_dpm++_2m_sde",
             "edm_dpm++_3m_sde",
-            "dds",
+            "dds",  # age-aware sampler
         ],
         help="Sampler type. Different samplers may produce very different samples.",
     )
@@ -120,7 +88,7 @@ def parse_args() -> Namespace:
         choices=["noise", "cond"],
         default="noise",
         help=(
-            "For DiffBIR v1 and v2, setting the start point types to 'cond' can make the results much more stable "
+            "setting the start point types to 'cond' can make the results much more stable "
             "and ensure that the outcomes from ODE samplers like DDIM and DPMS are normal. "
             "However, this adjustment may lead to a decrease in sample quality."
         ),
@@ -164,11 +132,12 @@ def parse_args() -> Namespace:
         "--cldm_tile_stride", type=int, default=256, help="Stride between tiles."
     )
     parser.add_argument(
-        "--captioner",
-        type=str,
-        choices=["none", "llava", "ram"],
-        default="llava",
-        help="Select a model to describe the content of your input image.",
+        "--dds_steps", type=int, default=1, help="Number of age-aware gradient optimization steps."
+    )
+    parser.add_argument(
+        "--age_guidance",
+        action="store_true",
+        help="Enable age guidance for the model.",
     )
     parser.add_argument(
         "--src_prompt",
@@ -251,23 +220,6 @@ def parse_args() -> Namespace:
         help="Control strength from ControlNet. Less strength, more creative.",
     )
     parser.add_argument("--batch_size", type=int, default=1, help="Nothing to say.")
-    # guidance parameters
-    parser.add_argument(
-        "--guidance", action="store_true", help="Enable restoration guidance."
-    )
-    parser.add_argument(
-        "--g_loss",
-        type=str,
-        default="w_mse",
-        choices=["mse", "w_mse"],
-        help="Loss function of restoration guidance.",
-    )
-    parser.add_argument(
-        "--g_scale",
-        type=float,
-        default=0.0,
-        help="Learning rate of optimizing the guidance loss function.",
-    )
     # common parameters
     parser.add_argument(
         "--input",
@@ -305,16 +257,8 @@ def main():
     args.device = check_device(args.device)
     set_seed(args.seed) 
 
-    if args.version != "custom":
-        loops = {
-            "sr": BSRInferenceLoop,
-            "denoise": BIDInferenceLoop,
-            "face": BFRInferenceLoop,
-            "unaligned_face": UnAlignedBFRInferenceLoop,
-        }
-        loops[args.task](args).run()
-    else:
-        CustomInferenceLoop(args).run()
+    InferenceLoop(args).run()
+
     print("done!")
 
 

@@ -36,3 +36,5 @@ ICLR/
 val/
 ram/
 scripts/
+outputs/
+pretrained_models/
