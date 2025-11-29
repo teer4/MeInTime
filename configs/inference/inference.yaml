@@ -1,0 +1,6 @@
+infer:
+  # pretrained adapter path
+  adapter_path: "train_checkpoints/train_gate_cat_0.75/0280000.pt"
+  sd_path: "weights/v2-1_512-ema-pruned.ckpt"
+  controlnet_path: "v1_face.pth"
+  swinir_path: "/DiffBIR/weights/face_swinir_v1.ckpt"
