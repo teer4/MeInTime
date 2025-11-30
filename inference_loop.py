@@ -64,8 +64,8 @@ class InferenceLoop:
             sd_ckpt = torch.load(self.infer_cfg.infer.sd_path, map_location="cpu")
             sd_weight = sd_ckpt["state_dict"]
             del sd_ckpt
-            print("load sd weight from", self.infer_cfg.infer.sd_path)
-            print("load pretrained stable diffusion")
+            unused, missing = self.cldm.load_pretrained_sd(sd_weight)
+            print(f"load pretrained stable diffusion, unused: {unused}, missing: {missing}")
             del sd_weight
 
         with torch.no_grad():
@@ -229,9 +229,9 @@ class InferenceLoop:
                     batch_samples = self.pipeline.run(
                         np.tile(lq[None], (n_inputs, 1, 1, 1)),
                         self.args.steps,
+                        self.args.strength,
                         self.args.dds_steps,
                         self.args.age_guidance,
-                        self.args.strength,
                         self.args.cleaner_tiled,
                         self.args.cleaner_tile_size,
                         self.args.cleaner_tile_stride,

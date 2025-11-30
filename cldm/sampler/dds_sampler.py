@@ -17,7 +17,7 @@ class DDSSampler(SpacedSampler):
         parameterization: Literal["eps", "v"],
         rescale_cfg: bool,
         #dds_lr: float = 0.5,  
-        dds_steps: int = 1,  
+        dds_steps: int = 5,  
         age_guidance: bool = False,  
     ) -> "DDSSampler":
         super().__init__(betas, parameterization, rescale_cfg)
@@ -86,6 +86,6 @@ class DDSSampler(SpacedSampler):
                             eps_trg = model(x, model_t, cond_trg, image_prompt, lambda_t)
                         delta_eps = eps_trg - eps_src
                         loss = (delta_eps * x).mean()    
-                        grad = torch.autograd.grad(1200 * loss, x)[0]
+                        grad = torch.autograd.grad(1000 * loss, x)[0]
                         x = x - scale * grad.detach()  
         return x
