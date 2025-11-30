@@ -1,3 +1,3 @@
 
-## DiffBIR: Towards Blind Image Restoration with Generative Diffusion Prior
+## MeInTime: Bridging Age Gap in Identity-Preserving Face Restoration
 
